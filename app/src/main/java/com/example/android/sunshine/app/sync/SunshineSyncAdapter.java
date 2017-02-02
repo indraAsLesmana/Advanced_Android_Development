@@ -234,7 +234,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             JSONObject forecastJson = new JSONObject(forecastJsonStr);
             /**
-             * check if server message code is 404
+             * @param OWM_MESSAGE_CODE check if server message code is 404
              * */
             if (forecastJson.has(OWM_MESSAGE_CODE)){
                 int serverMessage = forecastJson.getInt(OWM_MESSAGE_CODE);
