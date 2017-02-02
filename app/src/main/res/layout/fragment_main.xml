@@ -32,6 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:maxLines="5"
         android:text="@string/empety_view"
         android:textColor="@android:color/black" />
 

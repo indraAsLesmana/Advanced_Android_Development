@@ -77,7 +77,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
     //
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID,  LOCATION_STATUS_UNKNOWN})
+    @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID,
+            LOCATION_STATUS_UNKNOWN, LOCATION_STATUS_INVALID})
     public @interface LocationStatus {}
 
     public static final int
@@ -236,12 +237,23 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             /**
              * @param OWM_MESSAGE_CODE check if server message code is 404
              * */
-            if (forecastJson.has(OWM_MESSAGE_CODE)){
+            if (forecastJson.has(OWM_MESSAGE_CODE)) {
                 int serverMessage = forecastJson.getInt(OWM_MESSAGE_CODE);
-                if (serverMessage == HttpURLConnection.HTTP_NOT_FOUND){
-                    setLocationStatus(getContext(),
-                            SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID);
+                Log.d(LOG_TAG, "getWeatherDataFromJson: " + serverMessage);
+
+                switch (serverMessage) {
+                    case HttpURLConnection.HTTP_OK:
+                        break;
+                    case HttpURLConnection.HTTP_BAD_GATEWAY:
+                        setLocationStatus(getContext(),
+                                SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID);
+                        return;
+                    default:
+                        setLocationStatus(getContext(),
+                                SunshineSyncAdapter.LOCATION_STATUS_SERVER_DOWN);
+                        return;
                 }
+
             }
 
             JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
