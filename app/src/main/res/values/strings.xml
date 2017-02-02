@@ -111,5 +111,6 @@
 
     <!-- String if list is null or not evaluabe-->
     <string name="empety_view">No Weather Information Evaluabe</string>
+    <string name="network_problem">Please check your internet connection</string>
 
 </resources>

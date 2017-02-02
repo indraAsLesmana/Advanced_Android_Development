@@ -15,8 +15,12 @@
  */
 package com.example.android.sunshine.app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -254,13 +258,25 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        boolean isConnetionActive = Utility.getNetworkInfo(getActivity());
+        Log.d(LOG_TAG, "onLoadFinished: " + isConnetionActive + "data:" + data.getCount());
+
         mForecastAdapter.swapCursor(data);
         if (mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
             mListView.smoothScrollToPosition(mPosition);
         }
+
+        if (mForecastAdapter.getCount() < 1){
+            mEmpetyView.setText(getString(R.string.empety_view));
+
+            if (!isConnetionActive){
+                mEmpetyView.setText(getString(R.string.network_problem));
+            }
+        }
     }
+
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
