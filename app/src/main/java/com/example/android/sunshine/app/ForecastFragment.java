@@ -258,8 +258,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        boolean isConnetionActive = Utility.getNetworkInfo(getActivity());
-        Log.d(LOG_TAG, "onLoadFinished: " + isConnetionActive + "data:" + data.getCount());
 
         mForecastAdapter.swapCursor(data);
         if (mPosition != ListView.INVALID_POSITION) {
@@ -267,16 +265,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             // to, do so now.
             mListView.smoothScrollToPosition(mPosition);
         }
-
-        if (mForecastAdapter.getCount() < 1){
-            mEmpetyView.setText(getString(R.string.empety_view));
-
-            if (!isConnetionActive){
-                mEmpetyView.setText(getString(R.string.network_problem));
-            }
-        }
+        updateViewDataNull();
     }
-
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -287,6 +277,23 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mUseTodayLayout = useTodayLayout;
         if (mForecastAdapter != null) {
             mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
+        }
+    }
+
+    private void updateViewDataNull() {
+        if (mForecastAdapter.getCount() < 1) {
+            /**
+             * check network connectivity
+             * */
+            boolean isConnetionActive = Utility.getNetworkInfo(getActivity());
+
+            String dataNullMessage = getString(R.string.empety_view);
+            mEmpetyView.setText(dataNullMessage); //default message if data null
+
+            if (!isConnetionActive) {
+                mEmpetyView.setText(dataNullMessage + " " + getString(R.string.network_problem));
+                // extend default message if network also false
+            }
         }
     }
 }
