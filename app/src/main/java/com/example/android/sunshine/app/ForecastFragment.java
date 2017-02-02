@@ -280,11 +280,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         }
     }
 
+    /**
+     * this private method will check and show correct message,
+     * if data null or network is offline
+     * */
     private void updateViewDataNull() {
         if (mForecastAdapter.getCount() < 1) {
-            /**
-             * check network connectivity
-             * */
             boolean isConnetionActive = Utility.getNetworkInfo(getActivity());
 
             String dataNullMessage = getString(R.string.empety_view);
