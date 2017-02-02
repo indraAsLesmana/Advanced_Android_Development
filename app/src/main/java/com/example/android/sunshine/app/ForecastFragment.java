@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
@@ -46,6 +47,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private ListView mListView;
     private int mPosition = ListView.INVALID_POSITION;
     private boolean mUseTodayLayout;
+    private TextView mEmpetyView;
 
     private static final String SELECTED_KEY = "selected_position";
 
@@ -136,10 +138,15 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        mEmpetyView = (TextView) rootView.findViewById(R.id.empety_view);
 
         // Get a reference to the ListView, and attach this adapter to it.
         mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        // set empetyview
+        mListView.setEmptyView(mEmpetyView);
+        // set Adapter
         mListView.setAdapter(mForecastAdapter);
+
         // We'll call our MainActivity
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
