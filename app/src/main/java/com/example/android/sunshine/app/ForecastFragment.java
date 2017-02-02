@@ -17,12 +17,14 @@ package com.example.android.sunshine.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -44,7 +46,8 @@ import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 /**
  * Encapsulates fetching the forecast and displaying it as a {@link ListView} layout.
  */
-public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        SharedPreferences.OnSharedPreferenceChangeListener{
     public static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     private ForecastAdapter mForecastAdapter;
 
@@ -87,6 +90,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     static final int COL_WEATHER_CONDITION_ID = 6;
     static final int COL_COORD_LAT = 7;
     static final int COL_COORD_LONG = 8;
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_location_status))){
+            updateViewDataNull();
+        }
+    }
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -280,6 +290,20 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.unregisterOnSharedPreferenceChangeListener(this);
+    }
+
     /**
      * this private method will check and show correct message,
      * if data null or network is offline
@@ -289,12 +313,21 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             boolean isConnetionActive = Utility.getNetworkInfo(getActivity());
 
             String dataNullMessage = getString(R.string.empety_view);
-            mEmpetyView.setText(dataNullMessage); //default message if data null
+            @SunshineSyncAdapter.LocationStatus int location =  Utility.getlocationStatus(getActivity());
 
-            if (!isConnetionActive) {
-                mEmpetyView.setText(dataNullMessage + " " + getString(R.string.network_problem));
-                // extend default message if network also false
+            switch (location){
+                case SunshineSyncAdapter.LOCATION_STATUS_SERVER_DOWN:
+                    dataNullMessage = getString(R.string.empety_forcast_list_server_down);
+                    break;
+                case SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID:
+                    dataNullMessage = getString(R.string.empety_forcast_list_server_error);
+                    break;
+                default:
+                    if (!isConnetionActive){
+                        dataNullMessage = getString(R.string.empety_forcast_list_no_network);
+                    }
             }
+            mEmpetyView.setText(dataNullMessage); //default message if data null
         }
     }
 }
