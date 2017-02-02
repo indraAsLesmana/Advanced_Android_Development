@@ -80,12 +80,16 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID,  LOCATION_STATUS_UNKNOWN})
     public @interface LocationStatus {}
 
-    public static final int LOCATION_STATUS_OK = 0;
-    public static final int LOCATION_STATUS_SERVER_DOWN = 1;
+    public static final int
+            LOCATION_STATUS_OK = 0;
+    public static final int
+            LOCATION_STATUS_SERVER_DOWN = 1;
     public static final int
             LOCATION_STATUS_SERVER_INVALID = 2;
     public static final int
             LOCATION_STATUS_UNKNOWN = 3;
+    public static final int
+            LOCATION_STATUS_INVALID = 4;
 
 
     @Override
@@ -224,8 +228,22 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         final String OWM_DESCRIPTION = "main";
         final String OWM_WEATHER_ID = "id";
 
+        //message information
+        final String OWM_MESSAGE_CODE = "cod";
+
         try {
             JSONObject forecastJson = new JSONObject(forecastJsonStr);
+            /**
+             * check if server message code is 404
+             * */
+            if (forecastJson.has(OWM_MESSAGE_CODE)){
+                int serverMessage = forecastJson.getInt(OWM_MESSAGE_CODE);
+                if (serverMessage == HttpURLConnection.HTTP_NOT_FOUND){
+                    setLocationStatus(getContext(),
+                            SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID);
+                }
+            }
+
             JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
 
             JSONObject cityJson = forecastJson.getJSONObject(OWM_CITY);
